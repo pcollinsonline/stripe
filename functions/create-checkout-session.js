@@ -11,7 +11,8 @@ const handler = async event => {
     const product = utils.PRODUCTS.find(
       productRef => productRef.id === item.id
     );
-    const { unitPrice, name, description, quantity } = product;
+    const { quantity } = item;
+    const { unitPrice, name, description } = product;
     return {
       quantity,
       price_data: {
