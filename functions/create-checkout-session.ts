@@ -1,16 +1,18 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-var-requires,import/prefer-default-export */
+import { Handler } from '@netlify/functions';
+import { CORS_HEADERS, Item, PRODUCTS } from './lib/utils';
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const utils = require('./lib/utils');
 
-const handler = async event => {
-  const {
-    body: { items },
-  } = event;
+const handler: Handler = async event => {
+  const jsonPayload = JSON.parse(event.body || '');
+  const { items } = jsonPayload;
 
-  const lineItems = items.map(item => {
-    const product = utils.PRODUCTS.find(
-      productRef => productRef.id === item.id
-    );
+  const lineItems = items.map((item: Item) => {
+    const product = PRODUCTS.find(productRef => productRef.id === item.id);
+    if (!product) {
+      throw Error(`no product mapped to id ${item.id}`);
+    }
     const { quantity } = item;
     const { unitPrice, name, description } = product;
     return {
@@ -37,10 +39,10 @@ const handler = async event => {
 
     return {
       statusCode: 200,
-      headers: utils.CORS_HEADERS,
-      body: {
+      headers: CORS_HEADERS,
+      body: JSON.stringify({
         id: session.id,
-      },
+      }),
     };
   } catch (error) {
     // output to netlify function log
@@ -50,10 +52,10 @@ const handler = async event => {
     // todo - could do something better here...
     return {
       statusCode: 500,
-      headers: utils.CORS_HEADERS,
+      headers: CORS_HEADERS,
       body: JSON.stringify({ msg: error.message }),
     };
   }
 };
 
-module.exports = { handler };
+export { handler };
