@@ -53,7 +53,7 @@ const handler: Handler = async event => {
     return {
       statusCode: 500,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ msg: error.message }),
+      body: JSON.stringify({ message: error.message }),
     };
   }
 };
